@@ -95,6 +95,33 @@ class MediumImagenetHDF5Dataset(Dataset):
             )
         return transforms.Compose(transform)
 
+    def visualize_samples(self, samples=10):
+        images, labels = [], []
+        for index in range(0, samples):
+            raw_image = self.file[f"images-{self.split}"][index]
+            #image = self.transform(raw_image),dont want to do transform
+            image = raw_image
+            if self.split != "test":
+                label = self.file[f"labels-{self.split}"][index]
+            else:
+                label = -1
+            images.append(image)
+            labels.append(label)
+        images = torch.stack(images)
+        # Denormalize images?????
+        #mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+        #std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+        #images = images * std + mean
+        grid = make_grid(images, nrow=5, padding=2)
+        plt.figure(figsize=(15, 8))
+        plt.imshow(grid.permute(1, 2, 0).clip(0, 1))
+        # # Add labels
+        # label_names = [self.class_names[str(int(label))] if label != -1 else "Unknown"
+        #               for label in labels]
+        # plt.title("Labels: " + ", ".join(label_names), fontsize=8)
+        plt.axis('off')
+        plt.show()
+
 
 class CIFAR10Dataset(Dataset):
     def __init__(self, img_size=32, train=True):
